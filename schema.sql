@@ -231,7 +231,23 @@ CREATE TABLE diseasealert (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS audit_log (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action_type VARCHAR(50) NOT NULL, -- 'View', 'Edit', 'Delete', 'Login'
+    target_entity VARCHAR(50) NULL, -- 'Patient', 'Diagnosis'
+    target_id INT NULL,
+    details TEXT,
+    ip_address VARCHAR(45),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
 -- Indices
+CREATE INDEX idx_audit_user ON audit_log(user_id);
+CREATE INDEX idx_audit_action ON audit_log(action_type);
+
+-- Existing Indices
 CREATE INDEX idx_patient_region ON patient(region_id);
 CREATE INDEX idx_observation_patient_datetime ON observation(patient_id, observation_datetime);
 CREATE INDEX idx_diagnosis_patient_date ON diagnosis(patient_id, diagnosis_date);

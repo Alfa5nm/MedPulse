@@ -152,7 +152,30 @@ function getBadgeClass($level) {
     <!-- Recent Alerts -->
     <div class="col-lg-4">
         <div class="card glass-card h-100">
-            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+            <?php
+            // Get top region for trend (default to first if exists)
+            if ($regions->num_rows > 0) {
+                $regions->data_seek(0);
+                $firstRegion = $regions->fetch_assoc();
+                $region_id = $firstRegion['region_id'];
+                
+                $trendSql = "SELECT aggregate_date, avg_health_score, fever_rate 
+                            FROM regionalaggregate 
+                            WHERE region_id = $region_id 
+                            AND aggregate_date > DATE_SUB(CURDATE(), INTERVAL 7 DAY) 
+                            ORDER BY aggregate_date ASC";
+                $trendRes = $conn->query($trendSql);
+                $trendData = [];
+                while($tr = $trendRes->fetch_assoc()) { $trendData[] = $tr; }
+            }
+            ?>
+            <div class="card-header bg-transparent py-3">
+                <h6 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-chart-line me-2"></i> 7-Day Trend (<?= $firstRegion['region_name'] ?? 'N/A' ?>)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart" style="height: 150px;"></canvas>
+            </div>
+            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center border-top">
                 <h6 class="fw-bold mb-0 text-primary">Recent Active Alerts</h6>
                 <a href="alerts.php" class="btn btn-sm btn-outline-secondary rounded-pill">View All</a>
             </div>
