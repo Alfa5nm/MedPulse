@@ -1,0 +1,13 @@
+# Database Fixers & Purge Tools (Delete these before production)
+# database_fix.php
+# purge_data.php
+
+# Environment & Logs
+.DS_Store
+Thumbs.db
+*.log
+
+# Workspace metadata
+.vscode/
+.idea/
+.gemini/
