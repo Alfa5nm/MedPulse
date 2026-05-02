@@ -172,8 +172,33 @@ function getBadgeClass($level) {
             <div class="card-header bg-transparent py-3">
                 <h6 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-chart-line me-2"></i> 7-Day Trend (<?= $firstRegion['region_name'] ?? 'N/A' ?>)</h6>
             </div>
-            <div class="card-body">
-                <canvas id="trendChart" style="height: 150px;"></canvas>
+            <div class="card-body py-2">
+                <canvas id="trendChart" style="height: 120px;"></canvas>
+                <?php
+                    // Predictive Logic: Calculate velocity over last 48 hours
+                    $velocity = 0;
+                    if (count($trendData) >= 2) {
+                        $last = end($trendData)['avg_health_score'];
+                        $prev = $trendData[count($trendData)-2]['avg_health_score'];
+                        if ($prev > 0) {
+                            $velocity = (($last - $prev) / $prev) * 100;
+                        }
+                    }
+                ?>
+                <div class="mt-3 p-2 rounded bg-light border small">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Predictive Velocity:</span>
+                        <span class="fw-bold <?= $velocity > 15 ? 'text-danger' : 'text-success' ?>">
+                            <i class="fa-solid <?= $velocity > 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?> me-1"></i>
+                            <?= round($velocity, 1) ?>% / 48h
+                        </span>
+                    </div>
+                    <?php if($velocity > 25): ?>
+                        <div class="mt-1 text-danger fw-bold" style="font-size: 0.7rem;">
+                            <i class="fa-solid fa-circle-exclamation"></i> HIGH MOMENTUM OUTBREAK RISK
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
             <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center border-top">
                 <h6 class="fw-bold mb-0 text-primary">Recent Active Alerts</h6>

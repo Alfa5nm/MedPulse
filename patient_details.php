@@ -10,6 +10,18 @@ if ($patient_id <= 0) {
     exit;
 }
 
+// 🛡️ CLINICAL AUDIT: Record this record access
+$user_id = $_SESSION['user_id'] ?? null;
+$action = 'View';
+$entity = 'Patient';
+$ip = $_SERVER['REMOTE_ADDR'];
+$details = "Full clinical record access for Patient ID: $patient_id";
+
+$auditStmt = $conn->prepare("INSERT INTO audit_log (user_id, action_type, target_entity, target_id, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)");
+$auditStmt->bind_param("ississ", $user_id, $action, $entity, $patient_id, $details, $ip);
+$auditStmt->execute();
+$auditStmt->close();
+
 // Fetch Patient Info
 $sql = "SELECT p.*, CONCAT_WS(' > ', divi.region_name, d.region_name, r.region_name) as full_region_name
         FROM patient p 

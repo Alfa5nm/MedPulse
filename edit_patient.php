@@ -38,6 +38,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("isssssi", $region_id, $full_name, $date_of_birth, $gender, $blood_group, $phone, $patient_id);
         
         if ($stmt->execute()) {
+            // 🛡️ CLINICAL AUDIT: Record this modification
+            $user_id = $_SESSION['user_id'] ?? null;
+            $auditAction = 'Edit';
+            $auditEntity = 'Patient';
+            $auditIp = $_SERVER['REMOTE_ADDR'];
+            $auditDetails = "Updated demographics for Patient ID: $patient_id (Name: $full_name)";
+
+            $auditStmt = $conn->prepare("INSERT INTO audit_log (user_id, action_type, target_entity, target_id, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)");
+            $auditStmt->bind_param("ississ", $user_id, $auditAction, $auditEntity, $patient_id, $auditDetails, $auditIp);
+            $auditStmt->execute();
+            $auditStmt->close();
+
             header("Location: patient_details.php?id=$patient_id&success=updated");
             exit;
         } else {
