@@ -15,6 +15,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('Admin', 'Doctor', 'HealthWorker', 'Patient') NOT NULL DEFAULT 'HealthWorker',
     patient_id INT NULL,
+    is_self_registered BOOLEAN DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_patient FOREIGN KEY (patient_id) REFERENCES patient(patient_id) ON DELETE SET NULL
 );
@@ -42,6 +43,7 @@ CREATE TABLE patient (
     gender ENUM('Male','Female','Other') NOT NULL,
     blood_group VARCHAR(5),
     phone VARCHAR(20),
+    email VARCHAR(100),
     CONSTRAINT fk_patient_region
         FOREIGN KEY (region_id) REFERENCES region(region_id)
         ON DELETE RESTRICT ON UPDATE CASCADE
@@ -149,6 +151,8 @@ CREATE TABLE observation (
     loinc_code_id INT NOT NULL,
     observation_value DECIMAL(10,2) NOT NULL,
     unit VARCHAR(30),
+    is_verified BOOLEAN DEFAULT 1,
+    verified_by INT NULL,
     observation_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_observation_patient
         FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
@@ -167,6 +171,8 @@ CREATE TABLE prescription (
     duration_days INT NOT NULL,
     prescribed_date DATE NOT NULL,
     instructions TEXT,
+    is_verified BOOLEAN DEFAULT 1,
+    verified_by INT NULL,
     CONSTRAINT fk_prescription_patient
         FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
