@@ -53,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch regions for dropdown
-$regions = $conn->query("SELECT region_id, region_name FROM region WHERE region_type = 'Sub-district' ORDER BY region_name ASC");
+// Fetch regions for dropdown (Divisions first)
+$regions = $conn->query("SELECT region_id, region_name FROM region WHERE region_type = 'Division' ORDER BY region_name ASC");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -123,18 +123,10 @@ $regions = $conn->query("SELECT region_id, region_name FROM region WHERE region_
             </div>
 
             <!-- Conditional Patient Fields -->
-            <div id="patientFields" style="display: none;" class="bg-light p-3 rounded mb-4 border">
-                <h6 class="fw-bold small text-primary mb-3">Additional Patient Information</h6>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Your Region <span class="text-danger">*</span></label>
-                    <select name="region_id" class="form-select form-select-sm">
-                        <option value="">-- Select Location --</option>
-                        <?php while($r = $regions->fetch_assoc()): ?>
-                            <option value="<?= $r['region_id'] ?>"><?= htmlspecialchars($r['region_name']) ?></option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-                <div class="row g-2">
+            <div id="patientFields" style="display: none;" class="bg-light p-3 rounded mb-4 border shadow-sm">
+                <h6 class="fw-bold small text-primary mb-3"><i class="fa-solid fa-id-card me-1"></i> Patient Demographics</h6>
+                
+                <div class="row g-2 mb-3">
                     <div class="col-md-7">
                         <label class="form-label small fw-bold">Date of Birth</label>
                         <input type="date" name="dob" class="form-control form-control-sm">
@@ -148,6 +140,32 @@ $regions = $conn->query("SELECT region_id, region_name FROM region WHERE region_
                         </select>
                     </div>
                 </div>
+
+                <h6 class="fw-bold small text-primary mb-3 mt-4"><i class="fa-solid fa-location-dot me-1"></i> Residential Location</h6>
+                
+                <div class="mb-2">
+                    <label class="form-label small fw-bold">Division <span class="text-danger">*</span></label>
+                    <select id="division_id" class="form-select form-select-sm">
+                        <option value="">Select Division</option>
+                        <?php while($d = $regions->fetch_assoc()): ?>
+                            <option value="<?= $d['region_id'] ?>"><?= htmlspecialchars($d['region_name']) ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-bold">District <span class="text-danger">*</span></label>
+                    <select id="district_id" class="form-select form-select-sm" disabled>
+                        <option value="">Select District</option>
+                    </select>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label small fw-bold">Sub-district / Area <span class="text-danger">*</span></label>
+                    <select id="region_id" name="region_id" class="form-select form-select-sm" disabled>
+                        <option value="">Select Area</option>
+                    </select>
+                </div>
             </div>
 
             <script>
@@ -156,6 +174,50 @@ $regions = $conn->query("SELECT region_id, region_name FROM region WHERE region_
                     const fields = document.getElementById('patientFields');
                     fields.style.display = (role === 'Patient') ? 'block' : 'none';
                 }
+
+                // Hierarchical Region Fetching
+                document.getElementById('division_id').addEventListener('change', function() {
+                    let divId = this.value;
+                    let distSelect = document.getElementById('district_id');
+                    let subSelect = document.getElementById('region_id');
+                    
+                    distSelect.innerHTML = '<option value="">Loading...</option>';
+                    distSelect.disabled = true;
+                    subSelect.innerHTML = '<option value="">Select Area</option>';
+                    subSelect.disabled = true;
+
+                    if (divId) {
+                        fetch('get_regions.php?parent_id=' + divId)
+                            .then(res => res.json())
+                            .then(data => {
+                                distSelect.innerHTML = '<option value="">Select District</option>';
+                                data.forEach(d => {
+                                    distSelect.innerHTML += `<option value="${d.region_id}">${d.region_name}</option>`;
+                                });
+                                distSelect.disabled = false;
+                            });
+                    }
+                });
+
+                document.getElementById('district_id').addEventListener('change', function() {
+                    let distId = this.value;
+                    let subSelect = document.getElementById('region_id');
+                    
+                    subSelect.innerHTML = '<option value="">Loading...</option>';
+                    subSelect.disabled = true;
+
+                    if (distId) {
+                        fetch('get_regions.php?parent_id=' + distId)
+                            .then(res => res.json())
+                            .then(data => {
+                                subSelect.innerHTML = '<option value="">Select Area</option>';
+                                data.forEach(d => {
+                                    subSelect.innerHTML += `<option value="${d.region_id}">${d.region_name}</option>`;
+                                });
+                                subSelect.disabled = false;
+                            });
+                    }
+                });
             </script>
             <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-premium py-2 fw-bold shadow-sm">Register</button>
