@@ -79,7 +79,10 @@ $regions = $conn->query("SELECT r.*, p.region_name as parent_name FROM region r 
                             <thead><tr><th>ID</th><th>Medication Name</th></tr></thead>
                             <tbody>
                                 <?php while($m = $meds->fetch_assoc()): ?>
-                                    <tr><td>
+                                    <tr>
+                                        <td><span class="badge bg-light text-dark border"><?= $m['medication_code_id'] ?></span></td>
+                                        <td class="fw-medium"><?= htmlspecialchars($m['medication_name']) ?></td>
+                                    </tr>
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
