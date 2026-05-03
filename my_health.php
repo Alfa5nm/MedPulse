@@ -43,13 +43,40 @@ $rxSql = "SELECT p.*, m.medication_name,
           ORDER BY p.prescribed_date DESC";
 $rxResult = $conn->query($rxSql);
 
+// Check if vitals recorded today
+$vitalsTodayRes = $conn->query("SELECT COUNT(*) as c FROM observation WHERE patient_id = $patient_id AND DATE(observation_datetime) = CURDATE()");
+$vitalsToday = $vitalsTodayRes->fetch_assoc()['c'] > 0;
+
 include_once 'includes/header.php';
 ?>
 
 <div class="row fade-in-up">
     <div class="col-12 mb-4">
-        <h2 class="fw-bold mb-0 text-primary">My Health Portal</h2>
-        <p class="text-muted">Welcome back, <span class="fw-bold text-dark"><?= htmlspecialchars($patient['full_name']) ?></span>. Here is your current health overview.</p>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-0 text-primary">My Health Portal</h2>
+                <p class="text-muted">Welcome back, <span class="fw-bold text-dark"><?= htmlspecialchars($patient['full_name']) ?></span>. Here is your current health overview.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="add_observation.php?patient_id=<?= $patient_id ?>" class="btn btn-outline-primary rounded-pill"><i class="fa-solid fa-plus me-1"></i> Add Vitals</a>
+                <a href="add_prescription.php?patient_id=<?= $patient_id ?>" class="btn btn-outline-info rounded-pill"><i class="fa-solid fa-pills me-1"></i> Add Medication</a>
+            </div>
+        </div>
+
+        <?php if(!$vitalsToday): ?>
+            <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mt-3 fade-in-up" style="border-left: 5px solid #ffc107 !important;">
+                <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-0">Daily Health Action Required</h6>
+                    <p class="mb-0 small">You haven't recorded your vitals today. Please update your status to help us monitor your health.</p>
+                </div>
+                <div class="ms-3">
+                    <a href="add_observation.php?patient_id=<?= $patient_id ?>" class="btn btn-sm btn-warning fw-bold px-3">Update Now</a>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 

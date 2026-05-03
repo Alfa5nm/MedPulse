@@ -9,25 +9,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $conn->real_escape_string($_POST['username'] ?? '');
     $email = $conn->real_escape_string($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-    $role = 'HealthWorker'; // Strictly forced for security
+    $role = $conn->real_escape_string($_POST['role'] ?? 'HealthWorker');
+    
+    // Security: Only 'HealthWorker' and 'Patient' can be self-registered. 
+    // Doctors/Admins must still be manually created.
+    if (!in_array($role, ['HealthWorker', 'Patient'])) {
+        $role = 'HealthWorker';
+    }
 
     if (empty($username) || empty($email) || empty($password)) {
         $error = "All fields are required.";
     } else {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $username, $email, $password_hash, $role);
         
-        if ($stmt->execute()) {
-            $success = "Registration successful! You can now login.";
-        } else {
-            if ($stmt->errno == 1062) {
-                $error = "Email or Username already exists.";
-            } else {
-                $error = "Error: " . $stmt->error;
+        $conn->begin_transaction();
+        try {
+            $patient_id = null;
+            
+            // If registering as a patient, create the patient record first
+            if ($role === 'Patient') {
+                $pStmt = $conn->prepare("INSERT INTO patient (full_name, email) VALUES (?, ?)");
+                $pStmt->bind_param("ss", $username, $email);
+                $pStmt->execute();
+                $patient_id = $pStmt->insert_id;
+                $pStmt->close();
             }
+
+            $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash, role, patient_id, is_self_registered) VALUES (?, ?, ?, ?, ?, 1)");
+            $stmt->bind_param("ssssi", $username, $email, $password_hash, $role, $patient_id);
+            $stmt->execute();
+            
+            $conn->commit();
+            $success = "Registration successful! You can now login.";
+        } catch (Exception $e) {
+            $conn->rollback();
+            $error = "Error: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 ?>
@@ -89,10 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label small fw-bold">Password</label>
                 <input type="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
+            <div class="mb-4">
+                <label class="form-label small fw-bold">Register As</label>
+                <select name="role" class="form-select">
+                    <option value="HealthWorker">Community Health Worker</option>
+                    <option value="Patient">Patient (Self-Monitoring)</option>
+                </select>
+            </div>
             <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-premium py-2 fw-bold shadow-sm">Register</button>
             </div>
-            <p class="text-muted small text-center mb-0">Role will be defaulted to <strong>Health Worker</strong>.</p>
             <p class="text-muted small text-center">Already have an account? <a href="login.php" class="text-primary text-decoration-none fw-bold">Sign In</a></p>
         </form>
     </div>

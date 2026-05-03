@@ -33,8 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($medication_code_id <= 0 || empty($dosage) || empty($frequency) || $duration_days <= 0 || empty($prescribed_date)) {
         $error = "Please fill in all required fields.";
     } else {
-        $stmt = $conn->prepare("INSERT INTO prescription (patient_id, medication_code_id, dosage, frequency, duration_days, prescribed_date, instructions) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("iississ", $patient_id, $medication_code_id, $dosage, $frequency, $duration_days, $prescribed_date, $instructions);
+        $is_verified = isPatient() ? 0 : 1;
+        $verified_by = isPatient() ? null : $_SESSION['user_id'];
+        
+        $stmt = $conn->prepare("INSERT INTO prescription (patient_id, medication_code_id, dosage, frequency, duration_days, prescribed_date, instructions, is_verified, verified_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iississii", $patient_id, $medication_code_id, $dosage, $frequency, $duration_days, $prescribed_date, $instructions, $is_verified, $verified_by);
         
         if ($stmt->execute()) {
             header("Location: patient_details.php?id=$patient_id&success=prescription_added");

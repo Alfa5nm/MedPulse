@@ -67,6 +67,7 @@ try {
         $o2CountSql = "SELECT COUNT(DISTINCT patient_id) as c FROM observation 
                        WHERE loinc_code_id = 2 AND observation_value < 92 
                        AND DATE(observation_datetime) = CURDATE() 
+                       AND is_verified = 1
                        AND patient_id IN (SELECT patient_id FROM patient WHERE region_id IN ($targetIdsCsv))";
         $o2Count = $conn->query($o2CountSql)->fetch_assoc()['c'];
         $o2_rate = round(($o2Count / $pCount) * 100, 2);

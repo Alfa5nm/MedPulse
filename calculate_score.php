@@ -64,42 +64,34 @@ if ($total >= 7 || $temp_score == 3 || $spo2_score == 3 || $sys_bp_score == 3 ||
 
 $conn->begin_transaction();
 try {
-    $obsStmt = $conn->prepare("INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit) VALUES (?, ?, ?, ?)");
-    $now = date('Y-m-d H:i:s');
+    $is_verified = isPatient() ? 0 : 1;
+    $verified_by = isPatient() ? null : $_SESSION['user_id'];
+
+    $obsStmt = $conn->prepare("INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit, is_verified, verified_by) VALUES (?, ?, ?, ?, ?, ?)");
     
-    
-    
-    $loinc = 1;
-    $unit = 'C';
-    $obsStmt->bind_param("iids", $patient_id, $loinc, $temp, $unit);
+    // 1. Temp
+    $loinc = 1; $unit = 'C';
+    $obsStmt->bind_param("iidsii", $patient_id, $loinc, $temp, $unit, $is_verified, $verified_by);
     $obsStmt->execute();
     
-    
-    $loinc = 2;
-    $unit = '%';
-    $spoTemp = floatval($spo2);
-    $obsStmt->bind_param("iids", $patient_id, $loinc, $spoTemp, $unit);
+    // 2. Oxygen
+    $loinc = 2; $unit = '%'; $spoTemp = floatval($spo2);
+    $obsStmt->bind_param("iidsii", $patient_id, $loinc, $spoTemp, $unit, $is_verified, $verified_by);
     $obsStmt->execute();
 
-    
-    $loinc = 3;
-    $unit = 'mmHg';
-    $sbpTemp = floatval($sys_bp);
-    $obsStmt->bind_param("iids", $patient_id, $loinc, $sbpTemp, $unit);
+    // 3. BP
+    $loinc = 3; $unit = 'mmHg'; $sbpTemp = floatval($sys_bp);
+    $obsStmt->bind_param("iidsii", $patient_id, $loinc, $sbpTemp, $unit, $is_verified, $verified_by);
     $obsStmt->execute();
 
-    
-    $loinc = 4;
-    $unit = 'beats/min';
-    $pTemp = floatval($pulse);
-    $obsStmt->bind_param("iids", $patient_id, $loinc, $pTemp, $unit);
+    // 4. Pulse
+    $loinc = 4; $unit = 'beats/min'; $pTemp = floatval($pulse);
+    $obsStmt->bind_param("iidsii", $patient_id, $loinc, $pTemp, $unit, $is_verified, $verified_by);
     $obsStmt->execute();
 
-    
-    $loinc = 5;
-    $unit = 'breaths/min';
-    $rtemp = floatval($resp);
-    $obsStmt->bind_param("iids", $patient_id, $loinc, $rtemp, $unit);
+    // 5. Respiratory
+    $loinc = 5; $unit = 'breaths/min'; $rtemp = floatval($resp);
+    $obsStmt->bind_param("iidsii", $patient_id, $loinc, $rtemp, $unit, $is_verified, $verified_by);
     $obsStmt->execute();
 
     $hsStmt = $conn->prepare("INSERT INTO healthscore (patient_id, respiratory_score, oxygen_score, systolic_bp_score, pulse_score, temperature_score, consciousness_score, total_score, risk_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
