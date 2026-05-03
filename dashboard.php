@@ -105,45 +105,50 @@ function getBadgeClass($level) {
     
     <div class="col-lg-8">
         <div class="card glass-card h-100">
-            <div class="card-header bg-transparent py-3">
+            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
                 <h6 class="fw-bold mb-0 text-primary">Regional Health Summary (Latest Aggregates)</h6>
+                <button class="btn btn-sm btn-outline-primary rounded-pill border-0" type="button" data-bs-toggle="collapse" data-bs-target="#regionalSummaryCollapse">
+                    <i class="fa-solid fa-expand me-1"></i> Toggle View
+                </button>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-premium table-hover mb-0 text-sm">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">Region</th>
-                                <th>Date</th>
-                                <th>Monitored Pop.</th>
-                                <th>Avg Score</th>
-                                <th>Fever Rate</th>
-                                <th>Low O2 Rate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php 
-                            $locNames = []; $locScores = [];
-                            if($regions && $regions->num_rows > 0): 
-                            ?>
-                                <?php while($r = $regions->fetch_assoc()): 
-                                    $locNames[] = $r['region_name'];
-                                    $locScores[] = floatval($r['avg_health_score']);
+            <div class="collapse show" id="regionalSummaryCollapse">
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-premium table-hover mb-0 text-sm">
+                            <thead class="bg-light sticky-top">
+                                <tr>
+                                    <th class="ps-4">Region</th>
+                                    <th>Date</th>
+                                    <th>Monitored Pop.</th>
+                                    <th>Avg Score</th>
+                                    <th>Fever Rate</th>
+                                    <th>Low O2 Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                $locNames = []; $locScores = [];
+                                if($regions && $regions->num_rows > 0): 
                                 ?>
-                                    <tr>
-                                        <td class="ps-4 fw-medium text-dark"><i class="fa-solid fa-location-dot text-danger me-1"></i> <?= htmlspecialchars($r['region_name']) ?></td>
-                                        <td class="text-muted"><?= date('M d', strtotime($r['aggregate_date'])) ?></td>
-                                        <td><?= number_format($r['patient_count']) ?></td>
-                                        <td class="fw-bold <?= $r['avg_health_score'] >= 5 ? 'text-danger' : 'text-success' ?>"><?= number_format($r['avg_health_score'], 1) ?></td>
-                                        <td><?= $r['fever_rate'] ?>%</td>
-                                        <td><?= $r['low_oxygen_rate'] ?>%</td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            <?php else: ?>
-                                <tr><td colspan="6" class="text-center py-4 text-muted">No regional aggregates available yet. Run the aggregation script.</td></tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                                    <?php while($r = $regions->fetch_assoc()): 
+                                        $locNames[] = $r['region_name'];
+                                        $locScores[] = floatval($r['avg_health_score']);
+                                    ?>
+                                        <tr>
+                                            <td class="ps-4 fw-medium text-dark"><i class="fa-solid fa-location-dot text-danger me-1"></i> <?= htmlspecialchars($r['region_name']) ?></td>
+                                            <td class="text-muted"><?= date('M d', strtotime($r['aggregate_date'])) ?></td>
+                                            <td><?= number_format($r['patient_count']) ?></td>
+                                            <td class="fw-bold <?= $r['avg_health_score'] >= 5 ? 'text-danger' : 'text-success' ?>"><?= number_format($r['avg_health_score'], 1) ?></td>
+                                            <td><?= $r['fever_rate'] ?>%</td>
+                                            <td><?= $r['low_oxygen_rate'] ?>%</td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr><td colspan="6" class="text-center py-4 text-muted">No regional aggregates available yet. Run the aggregation script.</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -169,35 +174,41 @@ function getBadgeClass($level) {
                 while($tr = $trendRes->fetch_assoc()) { $trendData[] = $tr; }
             }
             ?>
-            <div class="card-header bg-transparent py-3">
-                <h6 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-chart-line me-2"></i> 7-Day Trend (<?= $firstRegion['region_name'] ?? 'N/A' ?>)</h6>
+            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-chart-line me-2"></i> 7-Day Trend</h6>
+                <button class="btn btn-sm btn-outline-info rounded-pill border-0" type="button" data-bs-toggle="collapse" data-bs-target="#trendCollapse">
+                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                </button>
             </div>
-            <div class="card-body py-2">
-                <canvas id="trendChart" style="height: 120px;"></canvas>
-                <?php
-                    
-                    $velocity = 0;
-                    if (count($trendData) >= 2) {
-                        $last = end($trendData)['avg_health_score'];
-                        $prev = $trendData[count($trendData)-2]['avg_health_score'];
-                        if ($prev > 0) {
-                            $velocity = (($last - $prev) / $prev) * 100;
+            <div class="collapse show" id="trendCollapse">
+                <div class="card-body py-2">
+                    <p class="small text-muted mb-2">Region: <strong><?= $firstRegion['region_name'] ?? 'N/A' ?></strong></p>
+                    <canvas id="trendChart" style="height: 120px;"></canvas>
+                    <?php
+                        
+                        $velocity = 0;
+                        if (count($trendData) >= 2) {
+                            $last = end($trendData)['avg_health_score'];
+                            $prev = $trendData[count($trendData)-2]['avg_health_score'];
+                            if ($prev > 0) {
+                                $velocity = (($last - $prev) / $prev) * 100;
+                            }
                         }
-                    }
-                ?>
-                <div class="mt-3 p-2 rounded bg-light border small">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Predictive Velocity:</span>
-                        <span class="fw-bold <?= $velocity > 15 ? 'text-danger' : 'text-success' ?>">
-                            <i class="fa-solid <?= $velocity > 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?> me-1"></i>
-                            <?= round($velocity, 1) ?>% / 48h
-                        </span>
-                    </div>
-                    <?php if($velocity > 25): ?>
-                        <div class="mt-1 text-danger fw-bold" style="font-size: 0.7rem;">
-                            <i class="fa-solid fa-circle-exclamation"></i> HIGH MOMENTUM OUTBREAK RISK
+                    ?>
+                    <div class="mt-3 p-2 rounded bg-light border small">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Predictive Velocity:</span>
+                            <span class="fw-bold <?= $velocity > 15 ? 'text-danger' : 'text-success' ?>">
+                                <i class="fa-solid <?= $velocity > 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?> me-1"></i>
+                                <?= round($velocity, 1) ?>% / 48h
+                            </span>
                         </div>
-                    <?php endif; ?>
+                        <?php if($velocity > 25): ?>
+                            <div class="mt-1 text-danger fw-bold" style="font-size: 0.7rem;">
+                                <i class="fa-solid fa-circle-exclamation"></i> HIGH MOMENTUM OUTBREAK RISK
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
             <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center border-top">
