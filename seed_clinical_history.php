@@ -27,8 +27,12 @@ try {
             $medId = $meds[array_rand($meds)];
             $date = date('Y-m-d', strtotime('-' . rand(5, 15) . ' days'));
             
-            $stmt = $conn->prepare("INSERT INTO prescription (patient_id, medication_code_id, dosage, frequency, duration_days, prescribed_date) VALUES (?, ?, '1 Tablet', 'Once Daily', 30, ?)");
-            $stmt->bind_param("iis", $pid, $medId, $date);
+            // Randomly decide if verified (70% chance)
+            $isV = (rand(1, 100) <= 70) ? 1 : 0;
+            $vBy = ($isV) ? 1 : null; 
+
+            $stmt = $conn->prepare("INSERT INTO prescription (patient_id, medication_code_id, dosage, frequency, duration_days, prescribed_date, is_verified, verified_by) VALUES (?, ?, '1 Tablet', 'Once Daily', 30, ?, ?, ?)");
+            $stmt->bind_param("iisii", $pid, $medId, $date, $isV, $vBy);
             $stmt->execute();
             $rxId = $conn->insert_id;
             

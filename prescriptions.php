@@ -28,7 +28,7 @@ $result = $conn->query($sql);
                         <th>Patient</th>
                         <th>Medication</th>
                         <th>Dosage & Frequency</th>
-                        <th>Duration</th>
+                        <th>Verification</th>
                         <th class="pe-4">Instructions</th>
                     </tr>
                 </thead>
@@ -40,7 +40,13 @@ $result = $conn->query($sql);
                                 <td class="fw-bold text-dark"><a href="patient_details.php?id=<?= $rx['patient_id'] ?>" class="text-decoration-none text-primary"><?= htmlspecialchars($rx['patient_name']) ?></a></td>
                                 <td><i class="fa-solid fa-capsules text-secondary me-1"></i> <?= htmlspecialchars($rx['medication_name']) ?></td>
                                 <td><?= htmlspecialchars($rx['dosage']) ?> <span class="badge bg-light text-dark border"><?= htmlspecialchars($rx['frequency']) ?></span></td>
-                                <td><?= intval($rx['duration_days']) ?> Days</td>
+                                <td>
+                                    <?php if($rx['is_verified']): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fa-solid fa-check-circle me-1"></i> Verified</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="fa-solid fa-clock me-1"></i> Self-Reported</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="pe-4 small text-muted"><?= htmlspecialchars($rx['instructions']) ?></td>
                             </tr>
                         <?php endwhile; ?>

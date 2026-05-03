@@ -1,5 +1,13 @@
 <?php
 require_once 'config/db.php';
+include_once 'includes/auth.php';
+
+// Redirect patients to their personal portal
+if (isPatient()) {
+    header("Location: my_health.php");
+    exit;
+}
+
 include_once 'includes/header.php';
 
 

@@ -3,7 +3,7 @@ require_once 'config/db.php';
 require_once 'includes/auth.php';
 
 if (isPatient()) {
-    header("Location: dashboard.php");
+    header("Location: my_health.php");
     exit;
 }
 

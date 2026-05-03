@@ -1,5 +1,12 @@
 <?php
 require_once 'config/db.php';
+include_once 'includes/auth.php';
+
+if (isPatient()) {
+    header("Location: my_health.php");
+    exit;
+}
+
 include_once 'includes/header.php';
 
 

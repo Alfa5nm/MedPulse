@@ -2,6 +2,11 @@
 require_once 'includes/auth.php';
 require_once 'config/db.php';
 
+if (isPatient()) {
+    header("Location: my_health.php");
+    exit;
+}
+
 
 
 
