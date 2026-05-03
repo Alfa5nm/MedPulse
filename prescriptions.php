@@ -2,7 +2,7 @@
 require_once 'config/db.php';
 include_once 'includes/header.php';
 
-// Fetch all prescriptions
+
 $sql = "SELECT p.*, pt.full_name as patient_name, mc.medication_name 
         FROM prescription p 
         JOIN patient pt ON p.patient_id = pt.patient_id

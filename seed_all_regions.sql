@@ -1,4 +1,4 @@
--- Auto-generated regions seed
+
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE region;
 
@@ -569,7 +569,7 @@ INSERT INTO region (region_id, region_name, region_type, parent_region_id) VALUE
 INSERT INTO region (region_id, region_name, region_type, parent_region_id) VALUES (565, 'Madhyanagar', 'Sub-district', 47);
 INSERT INTO region (region_id, region_name, region_type, parent_region_id) VALUES (566, 'Dasar', 'Sub-district', 58);
 
--- Re-seed patients to map to new region IDs
+
 TRUNCATE TABLE diseasealert;
 TRUNCATE TABLE regionalaggregate;
 TRUNCATE TABLE healthscore;

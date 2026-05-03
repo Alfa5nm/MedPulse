@@ -15,7 +15,7 @@ function addColumn($conn, $table, $col, $type) {
     }
 }
 
-// 1. Update Region Table
+
 echo "<h4>1. Updating Regions...</h4><ul>";
 addColumn($conn, 'region', 'division', 'VARCHAR(100) NULL');
 addColumn($conn, 'region', 'district', 'VARCHAR(100) NULL');
@@ -24,7 +24,7 @@ addColumn($conn, 'region', 'trigger_type', 'VARCHAR(50) NULL');
 addColumn($conn, 'region', 'trigger_value', 'FLOAT NULL');
 echo "</ul>";
 
-// 2. Create Master Code Table
+
 echo "<h4>2. Initializing Master Code Table...</h4>";
 $conn->query("CREATE TABLE IF NOT EXISTS code (
     code_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,7 +34,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS code (
     unit VARCHAR(50) NULL
 )");
 
-// 3. Add code_id to dictionaries
+
 echo "<h4>3. Syncing Dictionaries...</h4><ul>";
 addColumn($conn, 'icd_code', 'code_id', 'INT NULL');
 addColumn($conn, 'icd_code', 'disease_category', 'VARCHAR(100) NULL');
@@ -43,15 +43,15 @@ addColumn($conn, 'medication_code', 'code_id', 'INT NULL');
 addColumn($conn, 'snomed_code', 'code_id', 'INT NULL');
 echo "</ul>";
 
-// 4. Update Clinical Tables
+
 echo "<h4>4. Updating Clinical Structures...</h4><ul>";
 addColumn($conn, 'healthscore', 'response_score', 'TINYINT NOT NULL DEFAULT 0');
 addColumn($conn, 'regionalaggregate', 'avg_health_dn', 'INT NOT NULL DEFAULT 0');
 echo "</ul>";
 
-// 5. Data Migration (Optional: Populate 'code' table from existing dictionaries)
+
 echo "<h4>5. Performing Data Migration...</h4>";
-// Sync ICD to Code
+
 $res = $conn->query("SELECT icd_code_id, icd_code, disease_name FROM icd_code WHERE code_id IS NULL");
 while($row = $res->fetch_assoc()) {
     $stmt = $conn->prepare("INSERT INTO code (code, code_type, code_name) VALUES (?, 'ICD10', ?)");

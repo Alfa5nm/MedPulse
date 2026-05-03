@@ -2,7 +2,7 @@
 require_once 'config/db.php';
 include_once 'includes/header.php';
 
-// Fetch top metrics
+
 $patientCountRes = $conn->query("SELECT COUNT(*) as mt FROM patient")->fetch_assoc();
 $totalPatients = $patientCountRes['mt'];
 
@@ -12,9 +12,9 @@ $alertsToday = $alertsTodayRes['mt'];
 $avgScoreRes = $conn->query("SELECT AVG(total_score) as mt FROM healthscore")->fetch_assoc();
 $avgScore = round($avgScoreRes['mt'] ?? 0, 1);
 
-// Regional summary (latest available aggregates per region)
+
 $regionSql = "
-    SELECT r.region_name, a.patient_count, a.avg_health_score, a.fever_rate, a.low_oxygen_rate, a.aggregate_date
+    SELECT a.region_id, r.region_name, a.patient_count, a.avg_health_score, a.fever_rate, a.low_oxygen_rate, a.aggregate_date
     FROM regionalaggregate a
     JOIN region r ON a.region_id = r.region_id
     WHERE a.aggregate_date = (SELECT MAX(aggregate_date) FROM regionalaggregate ra WHERE ra.region_id = a.region_id)
@@ -22,7 +22,7 @@ $regionSql = "
 ";
 $regions = $conn->query($regionSql);
 
-// Fetch recent alerts
+
 $alertSql = "
     SELECT d.trigger_type, d.trigger_value, d.alert_level, d.alert_date, r.region_name 
     FROM diseasealert d 
@@ -39,7 +39,7 @@ function getBadgeClass($level) {
 }
 ?>
 
-<!-- Include Chart.js for premium visuals -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
@@ -52,7 +52,7 @@ function getBadgeClass($level) {
     </a>
 </div>
 
-<!-- Top Metrics -->
+
 <div class="row g-4 mb-4 fade-in-up" style="animation-delay: 0.1s;">
     <div class="col-md-4">
         <div class="card glass-card h-100 border-start border-4 border-primary">
@@ -102,7 +102,7 @@ function getBadgeClass($level) {
 </div>
 
 <div class="row g-4 fade-in-up" style="animation-delay: 0.2s;">
-    <!-- Regional Aggregates -->
+    
     <div class="col-lg-8">
         <div class="card glass-card h-100">
             <div class="card-header bg-transparent py-3">
@@ -149,11 +149,11 @@ function getBadgeClass($level) {
         </div>
     </div>
 
-    <!-- Recent Alerts -->
+    
     <div class="col-lg-4">
         <div class="card glass-card h-100">
             <?php
-            // Get top region for trend (default to first if exists)
+            
             if ($regions->num_rows > 0) {
                 $regions->data_seek(0);
                 $firstRegion = $regions->fetch_assoc();
@@ -175,7 +175,7 @@ function getBadgeClass($level) {
             <div class="card-body py-2">
                 <canvas id="trendChart" style="height: 120px;"></canvas>
                 <?php
-                    // Predictive Logic: Calculate velocity over last 48 hours
+                    
                     $velocity = 0;
                     if (count($trendData) >= 2) {
                         $last = end($trendData)['avg_health_score'];
@@ -275,7 +275,7 @@ if($regions && $regions->num_rows > 0) {
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Bar Chart
+    
     const ctx = document.getElementById('regionChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Leaflet Map
+    
     const mapData = <?= json_encode($mapData) ?>;
     const map = L.map('bdMap').setView([23.6850, 90.3563], 6.5);
     
@@ -307,10 +307,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }).addTo(map);
 
     function getColor(score) {
-        if (score === undefined) return '#f1f5f9'; // Very light gray for no data
-        return score >= 6 ? '#ef4444' : // Red (Critical)
-               score >= 3 ? '#f59e0b' : // Yellow (Warning)
-                            '#10b981';  // Green (Safe)
+        if (score === undefined) return '#f1f5f9'; 
+        return score >= 6 ? '#ef4444' : 
+               score >= 3 ? '#f59e0b' : 
+                            '#10b981';  
     }
 
     fetch('assets/js/bd-map.geojson')
@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     layer.bindTooltip(popupContent);
                     
-                    // Highlight on hover
+                    
                     layer.on({
                         mouseover: function(e) {
                             var layer = e.target;
@@ -363,8 +363,8 @@ document.addEventListener("DOMContentLoaded", function() {
                             layer.bringToFront();
                         },
                         mouseout: function(e) {
-                            // Reset style
-                            // Because style function uses the feature, we need to reset to default
+                            
+                            
                             let s = regionStat ? regionStat.score : undefined;
                             layer.setStyle({
                                 fillColor: getColor(s),

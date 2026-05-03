@@ -10,7 +10,7 @@ if ($patient_id <= 0) {
     exit;
 }
 
-// 🛡️ CLINICAL AUDIT: Record this record access
+
 $user_id = $_SESSION['user_id'] ?? null;
 $action = 'View';
 $entity = 'Patient';
@@ -22,7 +22,7 @@ $auditStmt->bind_param("ississ", $user_id, $action, $entity, $patient_id, $detai
 $auditStmt->execute();
 $auditStmt->close();
 
-// Fetch Patient Info
+
 $sql = "SELECT p.*, CONCAT_WS(' > ', divi.region_name, d.region_name, r.region_name) as full_region_name
         FROM patient p 
         LEFT JOIN region r ON p.region_id = r.region_id
@@ -37,12 +37,12 @@ if ($result->num_rows == 0) {
 }
 $patient = $result->fetch_assoc();
 
-// Fetch Latest Health Score
+
 $scoreSql = "SELECT * FROM healthscore WHERE patient_id = $patient_id ORDER BY score_datetime DESC LIMIT 1";
 $scoreResult = $conn->query($scoreSql);
 $latestScore = $scoreResult->fetch_assoc();
 
-// Fetch Recent Observations
+
 $obsSql = "SELECT o.*, l.test_name, l.unit_name 
            FROM observation o 
            JOIN loinc_code l ON o.loinc_code_id = l.loinc_code_id 
@@ -50,7 +50,7 @@ $obsSql = "SELECT o.*, l.test_name, l.unit_name
            ORDER BY o.observation_datetime DESC LIMIT 10";
 $obsResult = $conn->query($obsSql);
 
-// Fetch Diagnosis History
+
 $diagSql = "SELECT d.*, i.disease_name, i.icd_code 
             FROM diagnosis d 
             JOIN icd_code i ON d.icd_code_id = i.icd_code_id 
@@ -58,7 +58,7 @@ $diagSql = "SELECT d.*, i.disease_name, i.icd_code
             ORDER BY d.diagnosis_date DESC";
 $diagResult = $conn->query($diagSql);
 
-// Fetch Recent Prescriptions
+
 $rxSql = "SELECT p.*, m.medication_name 
           FROM prescription p 
           JOIN medication_code m ON p.medication_code_id = m.medication_code_id 
@@ -66,7 +66,7 @@ $rxSql = "SELECT p.*, m.medication_name
           ORDER BY p.prescribed_date DESC LIMIT 10";
 $rxResult = $conn->query($rxSql);
 
-// Fetch Questionnaire Responses
+
 $respSql = "SELECT r.*, q.question_text, qt.template_name 
             FROM response r 
             JOIN question q ON r.question_id = q.question_id 
@@ -75,7 +75,7 @@ $respSql = "SELECT r.*, q.question_text, qt.template_name
             ORDER BY r.response_datetime DESC LIMIT 20";
 $respResult = $conn->query($respSql);
 
-// Fetch Intake Logs
+
 $intakeSql = "SELECT i.*, m.medication_name 
               FROM intake_log i 
               JOIN prescription p ON i.prescription_id = p.prescription_id 
@@ -84,7 +84,7 @@ $intakeSql = "SELECT i.*, m.medication_name
               ORDER BY i.intake_datetime DESC LIMIT 15";
 $intakeResult = $conn->query($intakeSql);
 
-// Check if patient has a user account
+
 $userSql = "SELECT user_id, username FROM users WHERE patient_id = $patient_id";
 $userRes = $conn->query($userSql);
 $hasAccount = ($userRes && $userRes->num_rows > 0);

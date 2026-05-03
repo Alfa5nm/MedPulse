@@ -2,14 +2,14 @@
 require_once 'config/db.php';
 include_once 'includes/header.php';
 
-// Prepare filters
+
 $region_filter = isset($_GET['region_id']) ? intval($_GET['region_id']) : 0;
 $date_filter = isset($_GET['date']) ? $conn->real_escape_string($_GET['date']) : '';
 
-// Fetch all regions for dropdown
+
 $regionsRs = $conn->query("SELECT region_id, region_name FROM region ORDER BY region_name");
 
-// Fetch alerts based on filters
+
 $sql = "SELECT d.*, r.region_name 
         FROM diseasealert d 
         JOIN region r ON d.region_id = r.region_id

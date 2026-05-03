@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// List of pages that don't require authentication
+
 $public_pages = ['login.php', 'register.php'];
 $current_page = basename($_SERVER['PHP_SELF']);
 

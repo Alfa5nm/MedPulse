@@ -11,7 +11,7 @@ if ($prescription_id <= 0) {
     exit;
 }
 
-// Fetch Prescription and Patient Info
+
 $sql = "SELECT p.*, pt.full_name, mc.medication_name 
         FROM prescription p 
         JOIN patient pt ON p.patient_id = pt.patient_id
@@ -27,7 +27,7 @@ if ($result->num_rows == 0) {
 $rx = $result->fetch_assoc();
 $patient_id = $rx['patient_id'];
 
-// Handle Form Submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status = $_POST['intake_status'] ?? 'Taken';
     $remarks = $_POST['remarks'] ?? '';

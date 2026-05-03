@@ -2,14 +2,14 @@
 require_once 'includes/auth.php';
 require_once 'config/db.php';
 
-// In a real system, this would be an automated Cron job.
-// For the demo, we are running it manually via a button click.
+
+
 
 $today = date('Y-m-d');
 $conn->begin_transaction();
 
 try {
-    // 1. Fetch all regions to build a hierarchy map
+    
     $allRegionsSql = "SELECT region_id, parent_region_id FROM region";
     $allRegionsRes = $conn->query($allRegionsSql);
     $regionsMap = [];
@@ -17,7 +17,7 @@ try {
         $regionsMap[] = $row;
     }
 
-    // Helper function to recursively find all descendant region IDs
+    
     function getDescendantIds($region_id, $regionsMap) {
         $ids = [$region_id];
         foreach ($regionsMap as $r) {
@@ -28,22 +28,22 @@ try {
         return $ids;
     }
 
-    // 2. Iterate through EVERY region
+    
     foreach ($regionsMap as $region) {
         $region_id = $region['region_id'];
         
-        // Get this region and all its sub-regions
+        
         $targetIds = getDescendantIds($region_id, $regionsMap);
         $targetIdsCsv = implode(',', $targetIds);
         
-        // Count total patients in this region + sub-regions
+        
         $pCountSql = "SELECT COUNT(patient_id) as c FROM patient WHERE region_id IN ($targetIdsCsv)";
         $pCount = $conn->query($pCountSql)->fetch_assoc()['c'];
         
-        // Skip aggregation for this level if no patients exist anywhere in its hierarchy
+        
         if ($pCount == 0) continue;
         
-        // Calculate average health score for the region hierarchy today
+        
         $hsSql = "SELECT AVG(total_score) as avg_score FROM (
                     SELECT h.total_score 
                     FROM healthscore h 
@@ -55,7 +55,7 @@ try {
         $hsRes = $conn->query($hsSql)->fetch_assoc();
         $avg_score = round($hsRes['avg_score'] ?? 0, 2);
         
-        // Calculate Fever Rate (LOINC: 8310-5 / Temp >= 38)
+        
         $feverCountSql = "SELECT COUNT(DISTINCT patient_id) as c FROM observation 
                           WHERE loinc_code_id = 1 AND observation_value >= 38.0 
                           AND DATE(observation_datetime) = CURDATE() 
@@ -63,7 +63,7 @@ try {
         $feverCount = $conn->query($feverCountSql)->fetch_assoc()['c'];
         $fever_rate = round(($feverCount / $pCount) * 100, 2);
         
-        // Calculate Low Oxygen Rate (LOINC: 2708-6 / SpO2 < 92)
+        
         $o2CountSql = "SELECT COUNT(DISTINCT patient_id) as c FROM observation 
                        WHERE loinc_code_id = 2 AND observation_value < 92 
                        AND DATE(observation_datetime) = CURDATE() 
@@ -71,7 +71,7 @@ try {
         $o2Count = $conn->query($o2CountSql)->fetch_assoc()['c'];
         $o2_rate = round(($o2Count / $pCount) * 100, 2);
         
-        // Upsert into RegionalAggregate (Use CURDATE() for date consistency)
+        
         $upsertStmt = $conn->prepare("INSERT INTO regionalaggregate (region_id, aggregate_date, patient_count, avg_health_score, fever_rate, low_oxygen_rate) 
                       VALUES (?, CURDATE(), ?, ?, ?, ?)
                       ON DUPLICATE KEY UPDATE 
@@ -83,9 +83,9 @@ try {
         $upsertStmt->execute();
         $upsertStmt->close();
         
-        // --- ALERT GENERATION ---
         
-        // Delete old alerts for today for this region so we don't spam duplicates
+        
+        
         $delStmt = $conn->prepare("DELETE FROM diseasealert WHERE region_id = ? AND alert_date = CURDATE()");
         $delStmt->bind_param("i", $region_id);
         $delStmt->execute();
@@ -121,7 +121,7 @@ try {
     
     $conn->commit();
     
-    // Redirect with success message
+    
     header("Location: dashboard.php?agg_success=1");
     exit;
 

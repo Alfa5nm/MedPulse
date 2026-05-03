@@ -19,7 +19,7 @@ $sys_bp_score = 0;
 $pulse_score = 0;
 $resp_score = 0;
 
-// Logical approximations structure for NEWS2
+
 if ($temp <= 35.0) $temp_score = 3;
 elseif ($temp >= 35.1 && $temp <= 36.0) $temp_score = 1;
 elseif ($temp >= 36.1 && $temp <= 38.0) $temp_score = 0;
@@ -50,7 +50,7 @@ elseif ($resp >= 12 && $resp <= 20) $resp_score = 0;
 elseif ($resp >= 21 && $resp <= 24) $resp_score = 2;
 elseif ($resp >= 25) $resp_score = 3;
 
-$consciousness_score = 0; // Hardcoded default, usually assessed by "AVPU" scale.
+$consciousness_score = 0; 
 
 $total = $temp_score + $spo2_score + $sys_bp_score + $pulse_score + $resp_score + $consciousness_score;
 
@@ -68,35 +68,35 @@ try {
     $obsStmt = $conn->prepare("INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit) VALUES (?, ?, ?, ?)");
     $now = date('Y-m-d H:i:s');
     
-    // Seed LOINC codes mapping: 1=Temp, 2=SpO2, 3=SysBP, 4=Pulse, 5=Resp
-    // Temp
+    
+    
     $loinc = 1;
     $unit = 'C';
     $obsStmt->bind_param("iids", $patient_id, $loinc, $temp, $unit);
     $obsStmt->execute();
     
-    // SpO2
+    
     $loinc = 2;
     $unit = '%';
     $spoTemp = floatval($spo2);
     $obsStmt->bind_param("iids", $patient_id, $loinc, $spoTemp, $unit);
     $obsStmt->execute();
 
-    // SysBP
+    
     $loinc = 3;
     $unit = 'mmHg';
     $sbpTemp = floatval($sys_bp);
     $obsStmt->bind_param("iids", $patient_id, $loinc, $sbpTemp, $unit);
     $obsStmt->execute();
 
-    // Pulse
+    
     $loinc = 4;
     $unit = 'beats/min';
     $pTemp = floatval($pulse);
     $obsStmt->bind_param("iids", $patient_id, $loinc, $pTemp, $unit);
     $obsStmt->execute();
 
-    // Resp
+    
     $loinc = 5;
     $unit = 'breaths/min';
     $rtemp = floatval($resp);

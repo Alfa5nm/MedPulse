@@ -1,4 +1,4 @@
--- Auto-generated massive patient seed
+
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE diseasealert;
 TRUNCATE TABLE regionalaggregate;

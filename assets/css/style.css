@@ -1,24 +1,24 @@
 :root {
-    --primary-color: #0f172a;
-    --secondary-color: #1e293b;
+    --primary-color: #0ea5e9;
+    --secondary-color: #0f172a;
     --accent-color: #38bdf8;
-    --danger-color: #f43f5e;
+    --danger-color: #ef4444;
     --success-color: #10b981;
-    --warning-color: #fbbf24;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --bg-color: #f4f6f9;
+    --warning-color: #f59e0b;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --bg-color: #f8fafc;
     --card-bg: rgba(255, 255, 255, 0.85);
 }
 
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
-    color: #334155;
+    color: var(--text-primary);
     overflow-x: hidden;
 }
 
-/* Glassmorphism Navbar */
+
 .premium-nav {
     background: rgba(15, 23, 42, 0.9) !important;
     backdrop-filter: blur(12px);
@@ -39,12 +39,12 @@ body {
 }
 
 .premium-nav .nav-link:hover, .premium-nav .nav-link.active {
-    color: #fff !important;
+    color: var(--accent-color) !important;
     background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
 }
 
-/* Glassmorphic Cards */
+
 .glass-card {
     background: var(--card-bg);
     backdrop-filter: blur(16px);
@@ -65,7 +65,7 @@ body {
     font-weight: 600;
 }
 
-/* Animations */
+
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
@@ -91,13 +91,13 @@ body {
     }
 }
 
-/* Health Score Badges */
-.badge-severe { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; border-radius: 20px; padding: 6px 12px; }
-.badge-high { background: linear-gradient(135deg, #f97316, #c2410c); color: white; border-radius: 20px; padding: 6px 12px; }
-.badge-medium { background: linear-gradient(135deg, #eab308, #a16207); color: white; border-radius: 20px; padding: 6px 12px; }
-.badge-low { background: linear-gradient(135deg, #22c55e, #166534); color: white; border-radius: 20px; padding: 6px 12px; }
 
-/* Custom Tables */
+.badge-severe { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border-radius: 8px; padding: 5px 10px; }
+.badge-high { background: linear-gradient(135deg, #f97316, #c2410c); color: white; border-radius: 8px; padding: 5px 10px; }
+.badge-medium { background: linear-gradient(135deg, #eab308, #a16207); color: white; border-radius: 8px; padding: 5px 10px; }
+.badge-low { background: linear-gradient(135deg, #10b981, #047857); color: white; border-radius: 8px; padding: 5px 10px; }
+
+
 .table-premium {
     background: transparent;
 }
@@ -121,7 +121,7 @@ body {
     background-color: rgba(56, 189, 248, 0.05);
 }
 
-/* Custom Inputs */
+
 .form-control {
     border-radius: 10px;
     border: 1px solid rgba(0,0,0,0.1);
@@ -143,7 +143,7 @@ body {
     transition: all 0.3s;
 }
 .btn-premium:hover {
-    background: linear-gradient(135deg, var(--primary-color), #000);
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     transform: translateY(-2px);
     color: white;

@@ -10,7 +10,7 @@ if ($template_id <= 0) {
     exit;
 }
 
-// Fetch Template Info
+
 $sql = "SELECT * FROM questionnaire_template WHERE template_id = $template_id";
 $result = $conn->query($sql);
 if ($result->num_rows == 0) {
@@ -20,7 +20,7 @@ if ($result->num_rows == 0) {
 }
 $template = $result->fetch_assoc();
 
-// Fetch Questions
+
 $qSql = "SELECT * FROM question WHERE template_id = $template_id ORDER BY display_order ASC";
 $qResult = $conn->query($qSql);
 ?>
@@ -42,7 +42,7 @@ $qResult = $conn->query($qSql);
             <?php if($qResult && $qResult->num_rows > 0): ?>
                 <?php while($q = $qResult->fetch_assoc()): ?>
                     <li class="list-group-item bg-transparent py-3 d-flex align-items-start">
-                        <div class="fw-bold text-muted me-3">#<?= $q['display_order'] ?></div>
+                        <div class="fw-bold text-muted me-3">
                         <div class="flex-grow-1">
                             <h6 class="mb-1 text-dark"><?= htmlspecialchars($q['question_text']) ?></h6>
                             <span class="badge bg-light text-secondary border mt-1"><i class="fa-solid fa-tag me-1"></i> Type: <?= htmlspecialchars($q['question_type']) ?></span>

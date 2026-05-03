@@ -11,7 +11,7 @@ if ($patient_id <= 0) {
     exit;
 }
 
-// Fetch Patient Info for display
+
 $stmt = $conn->prepare("SELECT full_name FROM patient WHERE patient_id = ?");
 $stmt->bind_param("i", $patient_id);
 $stmt->execute();
@@ -25,7 +25,7 @@ if ($patientResult->num_rows == 0) {
 $patient = $patientResult->fetch_assoc();
 $stmt->close();
 
-// Handle Form Submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $icd_code_id = intval($_POST['icd_code_id'] ?? 0);
     $snomed_code_id = !empty($_POST['snomed_code_id']) ? intval($_POST['snomed_code_id']) : null;
@@ -48,11 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch ICD Codes
+
 $icdSql = "SELECT icd_code_id, icd_code, disease_name FROM icd_code ORDER BY disease_name ASC";
 $icdResult = $conn->query($icdSql);
 
-// Fetch SNOMED Codes
+
 $snomedSql = "SELECT snomed_code_id, snomed_code, concept_name FROM snomed_code ORDER BY concept_name ASC";
 $snomedResult = $conn->query($snomedSql);
 ?>

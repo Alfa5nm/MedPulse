@@ -11,7 +11,7 @@ if ($patient_id <= 0) {
     exit;
 }
 
-// Fetch Patient Info
+
 $patientSql = "SELECT full_name FROM patient WHERE patient_id = $patient_id";
 $patientResult = $conn->query($patientSql);
 if ($patientResult->num_rows == 0) {
@@ -21,7 +21,7 @@ if ($patientResult->num_rows == 0) {
 }
 $patient = $patientResult->fetch_assoc();
 
-// Handle Form Submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $medication_code_id = intval($_POST['medication_code_id'] ?? 0);
     $dosage = $conn->real_escape_string($_POST['dosage'] ?? '');
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch Medication Codes
+
 $medSql = "SELECT medication_code_id, medication_name, generic_name FROM medication_code ORDER BY medication_name ASC";
 $medResult = $conn->query($medSql);
 ?>

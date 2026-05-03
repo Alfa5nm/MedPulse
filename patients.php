@@ -2,10 +2,10 @@
 require_once 'config/db.php';
 include_once 'includes/header.php';
 
-// Prepare search parameter
+
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-// Fetch patients
+
 $sql = "SELECT p.*, 
         CONCAT_WS(' > ', divi.region_name, d.region_name, r.region_name) as full_region_name
         FROM patient p 
@@ -80,7 +80,7 @@ $result = $conn->query($sql);
                     <?php if ($result && $result->num_rows > 0): ?>
                         <?php while ($row = $result->fetch_assoc()): ?>
                             <tr>
-                                <td class="ps-4 text-muted fw-bold">#<?= $row['patient_id'] ?></td>
+                                <td class="ps-4 text-muted fw-bold">
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">

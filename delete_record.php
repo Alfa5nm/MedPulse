@@ -4,13 +4,13 @@ require_once 'includes/auth.php';
 
 $type = $_GET['type'] ?? '';
 $id = intval($_GET['id'] ?? 0);
-$patient_id = intval($_GET['patient_id'] ?? 0); // For redirection
+$patient_id = intval($_GET['patient_id'] ?? 0); 
 
 if ($id <= 0 || empty($type)) {
     die("Invalid request.");
 }
 
-// Basic Authorization
+
 if ($type === 'patient' && !isAdmin()) {
     die("Unauthorized: Only Admins can delete patients.");
 }

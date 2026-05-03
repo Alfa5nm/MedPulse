@@ -60,13 +60,7 @@ $patient = $result->fetch_assoc();
                     <small class="text-muted">LOINC: 9279-1</small>
                 </div>
 
-                <!-- Hardcoded LOINC code IDs matching seed data:
-                     1: Temp (8310-5)
-                     2: SpO2 (2708-6)
-                     3: SysBP (8480-6)
-                     4: Pulse (8867-4)
-                     5: Resp (9279-1)
-                -->
+                
                 
                 <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-premium btn-lg shadow-sm"><i class="fa-solid fa-calculator me-2"></i> Save & Calculate NEWS2 Score</button>

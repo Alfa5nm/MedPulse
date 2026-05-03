@@ -2,7 +2,7 @@
 require_once 'config/db.php';
 include_once 'includes/header.php';
 
-// Fetch all questionnaire templates
+
 $sql = "SELECT qt.*, 
         (SELECT COUNT(*) FROM question q WHERE q.template_id = qt.template_id) as question_count,
         (SELECT COUNT(DISTINCT r.patient_id) FROM response r JOIN question q ON r.question_id = q.question_id WHERE q.template_id = qt.template_id) as patient_count

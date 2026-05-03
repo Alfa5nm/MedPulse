@@ -1,12 +1,12 @@
--- --------------------------------------------------------
--- Database Creation
--- --------------------------------------------------------
+
+
+
 CREATE DATABASE IF NOT EXISTS medpulse;
 USE medpulse;
 
--- --------------------------------------------------------
--- Table Definitions
--- --------------------------------------------------------
+
+
+
 
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -234,8 +234,8 @@ CREATE TABLE diseasealert (
 CREATE TABLE IF NOT EXISTS audit_log (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
-    action_type VARCHAR(50) NOT NULL, -- 'View', 'Edit', 'Delete', 'Login'
-    target_entity VARCHAR(50) NULL, -- 'Patient', 'Diagnosis'
+    action_type VARCHAR(50) NOT NULL, 
+    target_entity VARCHAR(50) NULL, 
     target_id INT NULL,
     details TEXT,
     ip_address VARCHAR(45),
@@ -243,11 +243,11 @@ CREATE TABLE IF NOT EXISTS audit_log (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
--- Indices
+
 CREATE INDEX idx_audit_user ON audit_log(user_id);
 CREATE INDEX idx_audit_action ON audit_log(action_type);
 
--- Existing Indices
+
 CREATE INDEX idx_patient_region ON patient(region_id);
 CREATE INDEX idx_observation_patient_datetime ON observation(patient_id, observation_datetime);
 CREATE INDEX idx_diagnosis_patient_date ON diagnosis(patient_id, diagnosis_date);
@@ -256,26 +256,26 @@ CREATE INDEX idx_intakelog_prescription_datetime ON intake_log(prescription_id, 
 CREATE INDEX idx_healthscore_patient_datetime ON healthscore(patient_id, score_datetime);
 CREATE INDEX idx_alert_region_date ON diseasealert(region_id, alert_date);
 
--- --------------------------------------------------------
--- Seed Data
--- --------------------------------------------------------
 
--- Regions (Dhaka Division -> Districts -> Sub-districts)
-INSERT INTO region (region_name, region_type, parent_region_id) VALUES 
-('Dhaka Division', 'Division', NULL); -- ID 1
+
+
+
 
 INSERT INTO region (region_name, region_type, parent_region_id) VALUES 
-('Dhaka District', 'District', 1),    -- ID 2
-('Gazipur District', 'District', 1),  -- ID 3
-('Narayanganj District', 'District', 1); -- ID 4
+('Dhaka Division', 'Division', NULL); 
 
 INSERT INTO region (region_name, region_type, parent_region_id) VALUES 
-('Mirpur', 'Sub-district', 2),        -- ID 5
-('Gulshan', 'Sub-district', 2),       -- ID 6
-('Tongi', 'Sub-district', 3),         -- ID 7
-('Sonargaon', 'Sub-district', 4);     -- ID 8
+('Dhaka District', 'District', 1),    
+('Gazipur District', 'District', 1),  
+('Narayanganj District', 'District', 1); 
 
--- Patients
+INSERT INTO region (region_name, region_type, parent_region_id) VALUES 
+('Mirpur', 'Sub-district', 2),        
+('Gulshan', 'Sub-district', 2),       
+('Tongi', 'Sub-district', 3),         
+('Sonargaon', 'Sub-district', 4);     
+
+
 INSERT INTO patient (region_id, full_name, date_of_birth, gender, blood_group, phone) VALUES 
 (5, 'Abdur Rahman', '1985-04-12', 'Male', 'O+', '01711223344'),
 (6, 'Fatima Begum', '1992-08-25', 'Female', 'A+', '01822334455'),
@@ -283,7 +283,7 @@ INSERT INTO patient (region_id, full_name, date_of_birth, gender, blood_group, p
 (8, 'Nusrat Jahan', '2001-02-14', 'Female', 'AB+', '01544556677'),
 (5, 'Sakib Hasan', '1995-07-30', 'Male', 'O-', '01655667788');
 
--- LOINC Codes (For Vitals)
+
 INSERT INTO loinc_code (loinc_code, test_name, unit_name) VALUES 
 ('8310-5', 'Body temperature', 'C'),
 ('2708-6', 'Oxygen saturation', '%'),
@@ -291,53 +291,53 @@ INSERT INTO loinc_code (loinc_code, test_name, unit_name) VALUES
 ('8867-4', 'Heart rate', 'beats/min'),
 ('9279-1', 'Respiratory rate', 'breaths/min');
 
--- ICD Codes
+
 INSERT INTO icd_code (icd_code, disease_name, disease_category) VALUES 
 ('J06.9', 'Acute upper respiratory infection, unspecified', 'Respiratory'),
 ('U07.1', 'COVID-19, virus identified', 'Infectious'),
 ('I10', 'Essential (primary) hypertension', 'Cardiovascular');
 
--- Observations (Simulating some recent readouts)
--- Patient 1 (Abdur Rahman) - Normal
+
+
 INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit, observation_datetime) VALUES
 (1, 1, 36.8, 'C', NOW() - INTERVAL 1 DAY),
 (1, 2, 98, '%', NOW() - INTERVAL 1 DAY),
 (1, 3, 120, 'mmHg', NOW() - INTERVAL 1 DAY),
 (1, 4, 75, 'beats/min', NOW() - INTERVAL 1 DAY);
 
--- Patient 2 (Fatima Begum) - Fever and low oxygen (COVID suspect pattern)
+
 INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit, observation_datetime) VALUES
 (2, 1, 38.5, 'C', NOW() - INTERVAL 2 HOUR),
 (2, 2, 91, '%', NOW() - INTERVAL 2 HOUR),
 (2, 3, 105, 'mmHg', NOW() - INTERVAL 2 HOUR),
 (2, 4, 115, 'beats/min', NOW() - INTERVAL 2 HOUR);
 
--- Patient 3 (Kamal Hossain) - High BP
+
 INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit, observation_datetime) VALUES
 (3, 1, 37.1, 'C', NOW() - INTERVAL 5 HOUR),
 (3, 2, 97, '%', NOW() - INTERVAL 5 HOUR),
 (3, 3, 160, 'mmHg', NOW() - INTERVAL 5 HOUR),
 (3, 4, 88, 'beats/min', NOW() - INTERVAL 5 HOUR);
 
--- Patient 5 (Sakib Hasan) - Critical 
+
 INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit, observation_datetime) VALUES
 (5, 1, 39.2, 'C', NOW() - INTERVAL 1 HOUR),
 (5, 2, 88, '%', NOW() - INTERVAL 1 HOUR),
 (5, 3, 85, 'mmHg', NOW() - INTERVAL 1 HOUR),
 (5, 4, 130, 'beats/min', NOW() - INTERVAL 1 HOUR);
 
--- Health Scores corresponding to above (Using generalized logic for NEWS2 estimates)
+
 INSERT INTO healthscore (patient_id, score_datetime, respiratory_score, oxygen_score, systolic_bp_score, pulse_score, temperature_score, consciousness_score, total_score, risk_level) VALUES
 (1, NOW() - INTERVAL 1 DAY, 0, 0, 0, 0, 0, 0, 0, 'Low'),
 (2, NOW() - INTERVAL 2 HOUR, 1, 3, 0, 1, 1, 0, 6, 'High'),
 (3, NOW() - INTERVAL 5 HOUR, 0, 0, 1, 0, 0, 0, 1, 'Low'),
 (5, NOW() - INTERVAL 1 HOUR, 2, 3, 3, 2, 2, 0, 12, 'Critical');
 
--- Seed an alert for the dashboard
+
 INSERT INTO diseasealert (region_id, alert_date, trigger_type, trigger_value, alert_level, remarks) VALUES 
 (5, CURDATE(), 'Low Oxygen Rate', 50.00, 'Critical', 'Spike in low oxygen cases detected in Mirpur');
 
--- Medications
+
 INSERT INTO medication_code (rxnorm_code, medication_name, generic_name, dosage_form) VALUES 
 ('161', 'Acetaminophen 500 MG Oral Tablet', 'Acetaminophen', 'Tablet'),
 ('308136', 'Amoxicillin 250 MG Oral Capsule', 'Amoxicillin', 'Capsule'),
@@ -345,19 +345,19 @@ INSERT INTO medication_code (rxnorm_code, medication_name, generic_name, dosage_
 ('855332', 'Albuterol 90 MCG/ACTUAT Inhaler', 'Albuterol', 'Inhaler'),
 ('153010', 'Ibuprofen 400 MG Oral Tablet', 'Ibuprofen', 'Tablet');
 
--- Questionnaire Templates
+
 INSERT INTO questionnaire_template (template_name, version_no, status) VALUES 
 ('General COVID-19 Screening', '1.0', 'Active'),
 ('Mental Health Assessment (PHQ-4)', '1.0', 'Active');
 
--- Questions for COVID-19 Screening (Template ID 1)
+
 INSERT INTO question (template_id, question_text, question_type, display_order) VALUES 
 (1, 'Have you experienced fever in the last 48 hours?', 'YesNo', 1),
 (1, 'Do you have a persistent dry cough?', 'YesNo', 2),
 (1, 'Are you experiencing any shortness of breath?', 'YesNo', 3),
 (1, 'Have you lost your sense of taste or smell recently?', 'YesNo', 4);
 
--- Questions for Mental Health Assessment (Template ID 2)
+
 INSERT INTO question (template_id, question_text, question_type, display_order) VALUES 
 (2, 'Over the last 2 weeks, how often have you been bothered by feeling nervous, anxious or on edge? (0-3)', 'Numeric', 1),
 (2, 'Over the last 2 weeks, how often have you been bothered by not being able to stop or control worrying? (0-3)', 'Numeric', 2),

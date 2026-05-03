@@ -2,7 +2,7 @@
 require_once 'config/db.php';
 require_once 'includes/auth.php';
 
-// If not a patient, redirect to clinician dashboard
+
 if ($_SESSION['role'] !== 'Patient') {
     header("Location: dashboard.php");
     exit;
@@ -10,7 +10,7 @@ if ($_SESSION['role'] !== 'Patient') {
 
 $patient_id = $_SESSION['patient_id'];
 
-// Fetch Patient Info
+
 $sql = "SELECT p.*, CONCAT_WS(' > ', divi.region_name, d.region_name, r.region_name) as full_region_name
         FROM patient p 
         LEFT JOIN region r ON p.region_id = r.region_id
@@ -20,12 +20,12 @@ $sql = "SELECT p.*, CONCAT_WS(' > ', divi.region_name, d.region_name, r.region_n
 $result = $conn->query($sql);
 $patient = $result->fetch_assoc();
 
-// Fetch Latest Health Score
+
 $scoreSql = "SELECT * FROM healthscore WHERE patient_id = $patient_id ORDER BY score_datetime DESC LIMIT 1";
 $scoreResult = $conn->query($scoreSql);
 $latestScore = $scoreResult->fetch_assoc();
 
-// Fetch Diagnosis History
+
 $diagSql = "SELECT d.*, i.disease_name, i.icd_code 
             FROM diagnosis d 
             JOIN icd_code i ON d.icd_code_id = i.icd_code_id 
@@ -33,7 +33,7 @@ $diagSql = "SELECT d.*, i.disease_name, i.icd_code
             ORDER BY d.diagnosis_date DESC";
 $diagResult = $conn->query($diagSql);
 
-// Fetch Active Prescriptions & Calculate Adherence
+
 $rxSql = "SELECT p.*, m.medication_name,
           (SELECT COUNT(*) FROM intake_log WHERE prescription_id = p.prescription_id AND intake_status = 'Taken') as doses_taken,
           DATEDIFF(CURDATE(), p.prescribed_date) + 1 as days_since_start
@@ -54,7 +54,7 @@ include_once 'includes/header.php';
 </div>
 
 <div class="row g-4 mb-4 fade-in-up">
-    <!-- Risk Status -->
+    
     <div class="col-lg-4">
         <div class="card glass-card h-100 border-top border-4 <?= $latestScore && strtolower($latestScore['risk_level']) == 'critical' ? 'border-danger' : 'border-success' ?>">
             <div class="card-body text-center p-4">
@@ -75,7 +75,7 @@ include_once 'includes/header.php';
         </div>
     </div>
 
-    <!-- Personal Info -->
+    
     <div class="col-lg-8">
         <div class="card glass-card h-100">
             <div class="card-body">
@@ -109,7 +109,7 @@ include_once 'includes/header.php';
 </div>
 
 <div class="row g-4 fade-in-up" style="animation-delay: 0.2s;">
-    <!-- Treatment & Adherence -->
+    
     <div class="col-lg-7">
         <div class="card glass-card h-100">
             <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
@@ -169,7 +169,7 @@ include_once 'includes/header.php';
         </div>
     </div>
 
-    <!-- Health Log & Surveys -->
+    
     <div class="col-lg-5">
         <div class="card glass-card mb-4">
             <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">

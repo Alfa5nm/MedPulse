@@ -12,7 +12,7 @@ if ($patient_id <= 0) {
     exit;
 }
 
-// Fetch existing data
+
 $sql = "SELECT * FROM patient WHERE patient_id = $patient_id";
 $result = $conn->query($sql);
 if ($result->num_rows == 0) {
@@ -22,7 +22,7 @@ if ($result->num_rows == 0) {
 }
 $patient = $result->fetch_assoc();
 
-// Handle form submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $full_name = $conn->real_escape_string($_POST['full_name'] ?? '');
     $date_of_birth = $conn->real_escape_string($_POST['date_of_birth'] ?? '');
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("isssssi", $region_id, $full_name, $date_of_birth, $gender, $blood_group, $phone, $patient_id);
         
         if ($stmt->execute()) {
-            // 🛡️ CLINICAL AUDIT: Record this modification
+            
             $user_id = $_SESSION['user_id'] ?? null;
             $auditAction = 'Edit';
             $auditEntity = 'Patient';
@@ -59,11 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch Divisions
+
 $divSql = "SELECT region_id, region_name FROM region WHERE region_type = 'Division' ORDER BY region_name ASC";
 $divResult = $conn->query($divSql);
 
-// Fetch current region hierarchy for pre-filling
+
 $hierSql = "SELECT r.region_id as sub_id, d.region_id as dist_id, divi.region_id as div_id
             FROM region r 
             JOIN region d ON r.parent_region_id = d.region_id
@@ -138,7 +138,7 @@ $hier = $hierRes->fetch_assoc();
                         <div class="col-md-4">
                             <label class="form-label fw-bold">District <span class="text-danger">*</span></label>
                             <select id="district_id" class="form-select" required>
-                                <!-- Pre-filled via JS or direct SQL? I'll use JS trigger -->
+                                
                                 <option value="">Loading...</option>
                             </select>
                         </div>

@@ -5,7 +5,7 @@ include_once 'includes/header.php';
 $error = '';
 $success = '';
 
-// Handle form submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $full_name = $conn->real_escape_string($_POST['full_name'] ?? '');
     $date_of_birth = $conn->real_escape_string($_POST['date_of_birth'] ?? '');
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch Divisions for first dropdown
+
 $divSql = "SELECT region_id, region_name FROM region WHERE region_type = 'Division' ORDER BY region_name ASC";
 $divResult = $conn->query($divSql);
 ?>

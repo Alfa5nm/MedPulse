@@ -12,7 +12,7 @@ $tab = $_GET['tab'] ?? 'meds';
 $success = '';
 $error = '';
 
-// Handle adding new items
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_med'])) {
         $name = $conn->real_escape_string($_POST['med_name']);
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch lists
+
 $meds = $conn->query("SELECT * FROM medication_code ORDER BY medication_name ASC");
 $icds = $conn->query("SELECT * FROM icd_code ORDER BY disease_name ASC");
 $regions = $conn->query("SELECT r.*, p.region_name as parent_name FROM region r LEFT JOIN region p ON r.parent_region_id = p.region_id ORDER BY r.region_type, r.region_name");
@@ -79,7 +79,7 @@ $regions = $conn->query("SELECT r.*, p.region_name as parent_name FROM region r 
                             <thead><tr><th>ID</th><th>Medication Name</th></tr></thead>
                             <tbody>
                                 <?php while($m = $meds->fetch_assoc()): ?>
-                                    <tr><td>#<?= $m['medication_code_id'] ?></td><td class="fw-medium"><?= htmlspecialchars($m['medication_name']) ?></td></tr>
+                                    <tr><td>
                                 <?php endwhile; ?>
                             </tbody>
                         </table>

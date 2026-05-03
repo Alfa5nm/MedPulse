@@ -10,12 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $patient_id = intval($_POST['patient_id']);
     $email = $conn->real_escape_string($_POST['email']);
     
-    // Fetch patient name for username
+    
     $pRes = $conn->query("SELECT full_name FROM patient WHERE patient_id = $patient_id");
     $p = $pRes->fetch_assoc();
     $username = strtolower(str_replace(' ', '', $p['full_name'])) . $patient_id;
     
-    // Default password: patient123
+    
     $password_hash = password_hash('patient123', PASSWORD_DEFAULT);
     $role = 'Patient';
     

@@ -13,7 +13,7 @@ if ($patient_id <= 0) {
     exit;
 }
 
-// Fetch Patient Info
+
 $patientSql = "SELECT full_name FROM patient WHERE patient_id = $patient_id";
 $patientResult = $conn->query($patientSql);
 if ($patientResult->num_rows == 0) {
@@ -23,12 +23,12 @@ if ($patientResult->num_rows == 0) {
 }
 $patient = $patientResult->fetch_assoc();
 
-// Handle Form Submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $template_id > 0) {
     $responses = $_POST['responses'] ?? [];
     
     if (!empty($responses)) {
-        // Start transaction
+        
         $conn->begin_transaction();
         try {
             $stmt = $conn->prepare("INSERT INTO response (patient_id, question_id, response_value) VALUES (?, ?, ?)");
@@ -51,11 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $template_id > 0) {
     }
 }
 
-// Fetch active templates for dropdown
+
 $templatesSql = "SELECT * FROM questionnaire_template WHERE status = 'Active' ORDER BY template_name ASC";
 $templatesResult = $conn->query($templatesSql);
 
-// Fetch questions if a template is selected
+
 $questions = [];
 $template_name = '';
 if ($template_id > 0) {
@@ -92,7 +92,7 @@ if ($template_id > 0) {
     <div class="col-lg-8 mx-auto">
         
         <?php if ($template_id == 0): ?>
-            <!-- Select Template Form -->
+            
             <div class="card glass-card">
                 <div class="card-body p-4 text-center">
                     <h5 class="fw-bold mb-4">Select a Questionnaire Template</h5>
@@ -113,7 +113,7 @@ if ($template_id > 0) {
                 </div>
             </div>
         <?php else: ?>
-            <!-- Questionnaire Form -->
+            
             <div class="card glass-card border-top border-4 border-info">
                 <div class="card-header bg-transparent py-3">
                     <h5 class="fw-bold mb-0 text-dark"><?= htmlspecialchars($template_name) ?></h5>
