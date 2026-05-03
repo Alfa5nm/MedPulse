@@ -1,64 +1,97 @@
-# MedPulse: Data Flow & Connectivity Architecture
+# MedPulse: Deep Data Flow & Connectivity Architecture
 
-This document provides a technical breakdown of how MedPulse fetches, processes, and stores data, and how the relational database tables are interlinked.
+This document provides a line-level technical breakdown of how MedPulse fetches, processes, and stores data using relational database principles.
 
 ---
 
 ## 1. The Core Connectivity Layer
 MedPulse uses a **Synchronous Data Flow** model powered by the **MySQLi Native Driver**.
 
-*   **Connection Point**: `config/db.php`. Every PHP file includes this to establish a persistent connection to the `medpulse` database.
-*   **Security Layer**: All "Write" operations (Uploads) use **Prepared Statements** (`$stmt->prepare()`). This prevents SQL injection by separating the query logic from the user data.
+### Connection Logic (`config/db.php`)
+Every module starts by establishing a handshake with the database. We use a centralized configuration to allow for easy deployment in different environments (Localhost vs Docker).
+
+```php
+// config/db.php
+$host = 'localhost'; // Or 'db' in Docker
+$user = 'root';
+$pass = '';
+$dbname = 'medpulse';
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+```
 
 ---
 
-## 2. Master Connection & Data Flow Table
+## 2. Secure Data Upload (Write Operations)
+All "Write" operations (Uploads) use **MySQLi Prepared Statements**. This ensures that user input is never executed as a command, neutralizing SQL Injection attacks.
 
-| PHP Module | Action Type | Primary Table(s) | Interlinked Table(s) | Update Logic |
-| :--- | :--- | :--- | :--- | :--- |
-| **register.php** | **Upload** | `users` | `patient` | Creates a User record; links to `patient_id` if registering as a patient. |
-| **add_observation.php** | **Upload** | `observation` | `loinc_code`, `patient` | Records vitals; triggers NEWS2 calculation in `calculate_score.php`. |
-| **calculate_score.php** | **Upload** | `healthscore` | `observation` | Aggregates last 6 vital values into a single risk score for a patient. |
-| **add_diagnosis.php** | **Upload** | `diagnosis` | `icd_code`, `snomed_code` | Links a disease code to a patient; supports dual coding standards. |
-| **add_prescription.php** | **Upload** | `prescription`| `medication_code` | Stores medication schedule; linked via `medication_code_id`. |
-| **record_intake.php** | **Upload** | `intake_log` | `prescription` | Updates the "Taken" status for a specific prescription. |
-| **run_aggregation.php** | **Fetch/Write**| `regionalaggregate`| `patient`, `healthscore` | **Complex Query**: Aggregates patient scores by `region_id` to create heatmaps. |
-| **dashboard.php** | **Fetch** | `regionalaggregate`| `region`, `diseasealert` | Reads the latest aggregated scores to render the Map and Trend charts. |
-| **patient_details.php** | **Fetch** | `patient` | `diagnosis`, `observation` | Joins 5+ tables to display a complete clinical history on one page. |
-| **my_health.php** | **Fetch** | `patient` | `intake_log`, `prescription`| Calculates **Adherence %** by comparing logs vs duration since prescribed. |
+### Example: Clinical Observation Upload (`add_observation.php`)
+When a clinician records vitals, the data flows through this secure pipeline:
 
----
+```php
+// Step 1: Prepare the Template
+$stmt = $conn->prepare("INSERT INTO observation (patient_id, loinc_code_id, observation_value, unit, observation_datetime) 
+                        VALUES (?, ?, ?, ?, NOW())");
 
-## 3. How the Database is Interlinked (Relational Logic)
+// Step 2: Bind User Data to the Template
+$stmt->bind_param("iiss", $patient_id, $loinc_id, $value, $unit);
 
-The database is built on **Referential Integrity**. This means if you delete a patient, their history is handled safely.
-
-### A. The Geographic Chain (Hierarchy)
-*   **Link**: `region.parent_region_id` → `region.region_id` (Self-join).
-*   **Logic**: Every patient is linked to a **Sub-district**. That sub-district is linked to a **District**, which is linked to a **Division**.
-*   **Outcome**: This allows us to "drill up." We can see health data for a tiny village or an entire province using the same query.
-
-### B. The Clinical Chain (Terminology)
-*   **Link**: `icd_code`, `snomed_code`, and `loinc_code` all inherit from the master `code` table.
-*   **Logic**: A **Diagnosis** doesn't store a disease name; it stores a **Foreign Key** to the code dictionary. This ensures that "COVID-19" is spelled the same way across 1 million records.
-
-### C. The Risk Chain (Analytics)
-*   **Link**: `observation` → `healthscore` → `regionalaggregate` → `diseasealert`.
-*   **Logic**:
-    1.  **Vitals** are uploaded.
-    2.  **HealthScore** is computed.
-    3.  **Aggregator** calculates the average Score for a Region.
-    4.  **Alert Engine** checks if that Avg Score > Threshold.
-    5.  **Alert** is uploaded if the condition is met.
+// Step 3: Execute the Interlinked Action
+$stmt->execute();
+```
 
 ---
 
-## 4. Data Lifecycle Example (The "Vitals" Journey)
+## 3. Relational Interlinks (Fetching Data)
+MedPulse relies on **Complex Joins** to fetch data across multiple tables. This is how we "interlink" clinical history into a single view.
 
-1.  **Fetch**: `add_observation.php` fetches the list of **LOINC** codes so the doctor can pick "Heart Rate."
-2.  **Upload**: Doctor enters "85 bpm." The data is uploaded to `observation` table.
-3.  **Interlink**: The code calculates the NEWS2 score. It fetches the patient's age and previous vitals from the `patient` and `observation` tables to see if the status is improving or worsening.
-4.  **Refresh**: `dashboard.php` fetches the new average for that patient's region, and the **Heatmap** color changes from Green to Yellow on the next refresh.
+### The "Deep Search" Query (`patient_details.php`)
+To show a patient's profile, we must link the Patient record to their Geographical hierarchy:
+
+```sql
+SELECT p.*, CONCAT_WS(' > ', divi.region_name, d.region_name, r.region_name) as full_region_name
+FROM patient p 
+LEFT JOIN region r ON p.region_id = r.region_id
+LEFT JOIN region d ON r.parent_region_id = d.region_id
+LEFT JOIN region divi ON d.parent_region_id = divi.region_id
+WHERE p.patient_id = ?
+```
+*   **Logic**: This query uses **Three Left Joins** on the same table (`region`) to climb the hierarchy from Sub-district up to Division.
 
 ---
-**MedPulse Data Architecture v2.1**
+
+## 4. The Analytics Aggregator (The "Group By" Engine)
+The **Heatmap** and **Trend Charts** are powered by a massive aggregation query in `run_aggregation.php`. This query "compresses" individual patient scores into a regional summary.
+
+### Aggregation Query Logic:
+```sql
+INSERT INTO regionalaggregate (region_id, aggregate_date, patient_count, avg_health_score, fever_rate)
+SELECT 
+    p.region_id, 
+    CURDATE(), 
+    COUNT(DISTINCT p.patient_id), 
+    AVG(h.total_score),
+    (SUM(CASE WHEN o.loinc_code_id = 1 AND o.observation_value >= 38 THEN 1 ELSE 0 END) / COUNT(*)) * 100
+FROM patient p
+JOIN healthscore h ON p.patient_id = h.patient_id
+JOIN observation o ON p.patient_id = o.patient_id
+GROUP BY p.region_id;
+```
+*   **Interlink**: This query connects **Demographics** (Patient) with **Clinical Status** (HealthScore) and **Raw Vitals** (Observation) to produce a regional risk metric.
+
+---
+
+## 5. Master Connection Logic Table
+
+| PHP Module | Connection Method | Key Code Snippet | Interlink Goal |
+| :--- | :--- | :--- | :--- |
+| **calculate_score.php** | `CASE` Statement | `SUM(CASE WHEN value > threshold THEN 3...)` | Convert raw vitals into a NEWS2 Risk Score. |
+| **my_health.php** | `DATEDIFF` | `DATEDIFF(CURDATE(), prescribed_date)` | Calculate **Medication Adherence** over time. |
+| **dashboard.php** | `JSON_ENCODE` | `json_encode($mapData)` | Convert SQL results into JS objects for Leaflet.js. |
+| **audit_log.php** | `INSERT` | `INSERT INTO audit_log (user_id, action...)` | Forensic tracking of every read/write action. |
+
+---
+**Technical Documentation v3.0**
