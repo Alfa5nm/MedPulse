@@ -54,10 +54,20 @@ $patient = $result->fetch_assoc();
                     <small class="text-muted">LOINC: 8867-4</small>
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label fw-medium"><i class="fa-solid fa-wind text-secondary me-1"></i> Respiratory Rate (breaths/min)</label>
                     <input type="number" step="1" class="form-control" name="respiratory" placeholder="e.g., 16" required>
                     <small class="text-muted">LOINC: 9279-1</small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-primary"><i class="fa-solid fa-brain me-1"></i> Consciousness (ACVPU)</label>
+                    <select name="consciousness" class="form-select border-primary" required>
+                        <option value="Alert" selected>Alert (Normal)</option>
+                        <option value="Confused">New Confusion / Voice</option>
+                        <option value="Pain">Pain / Unresponsive</option>
+                    </select>
+                    <small class="text-muted">Clinical status assessment for NEWS2.</small>
                 </div>
 
                 

@@ -12,14 +12,16 @@ $spo2 = intval($_POST['oxygen']);
 $sys_bp = intval($_POST['systolic_bp']);
 $pulse = intval($_POST['pulse']);
 $resp = intval($_POST['respiratory']);
+$consciousness = $_POST['consciousness'] ?? 'Alert';
 
 $temp_score = 0;
 $spo2_score = 0;
 $sys_bp_score = 0;
 $pulse_score = 0;
 $resp_score = 0;
+$consciousness_score = ($consciousness === 'Alert') ? 0 : 3;
 
-
+// NEWS2 Scoring Tables
 if ($temp <= 35.0) $temp_score = 3;
 elseif ($temp >= 35.1 && $temp <= 36.0) $temp_score = 1;
 elseif ($temp >= 36.1 && $temp <= 38.0) $temp_score = 0;
@@ -49,9 +51,6 @@ elseif ($resp >= 9 && $resp <= 11) $resp_score = 1;
 elseif ($resp >= 12 && $resp <= 20) $resp_score = 0;
 elseif ($resp >= 21 && $resp <= 24) $resp_score = 2;
 elseif ($resp >= 25) $resp_score = 3;
-
-$consciousness_score = 0; 
-
 $total = $temp_score + $spo2_score + $sys_bp_score + $pulse_score + $resp_score + $consciousness_score;
 
 $risk_level = 'Low';

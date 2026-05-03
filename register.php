@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $conn->real_escape_string($_POST['username'] ?? '');
     $email = $conn->real_escape_string($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-    $role = $conn->real_escape_string($_POST['role'] ?? 'HealthWorker');
+    $role = 'HealthWorker'; // Strictly forced for security
 
     if (empty($username) || empty($email) || empty($password)) {
         $error = "All fields are required.";
@@ -89,17 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label small fw-bold">Password</label>
                 <input type="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
-            <div class="mb-4">
-                <label class="form-label small fw-bold">Role</label>
-                <select name="role" class="form-select">
-                    <option value="HealthWorker">Community Health Worker</option>
-                    <option value="Doctor">Clinical Doctor</option>
-                    <option value="Admin">Administrator</option>
-                </select>
-            </div>
             <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-premium py-2 fw-bold shadow-sm">Register</button>
             </div>
+            <p class="text-muted small text-center mb-0">Role will be defaulted to <strong>Health Worker</strong>.</p>
             <p class="text-muted small text-center">Already have an account? <a href="login.php" class="text-primary text-decoration-none fw-bold">Sign In</a></p>
         </form>
     </div>

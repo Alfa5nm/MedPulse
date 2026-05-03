@@ -33,6 +33,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         <a class="nav-link <?= ($currentPage == 'manage_questionnaires.php' || $currentPage == 'add_questionnaire.php') ? 'active' : '' ?>" href="manage_questionnaires.php"><i class="fa-solid fa-clipboard-question me-1"></i> Templates</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link <?= ($currentPage == 'audit_logs.php') ? 'active' : '' ?>" href="audit_logs.php"><i class="fa-solid fa-shield-halved me-1"></i> Audit</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link <?= ($currentPage == 'manage_dictionaries.php') ? 'active' : '' ?>" href="manage_dictionaries.php"><i class="fa-solid fa-gears me-1"></i> Settings</a>
                     </li>
                     <?php endif; ?>
