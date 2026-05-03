@@ -21,4 +21,12 @@ function isAdmin() {
 function isDoctor() {
     return isset($_SESSION['role']) && ($_SESSION['role'] === 'Doctor' || $_SESSION['role'] === 'Admin');
 }
+
+function isHealthWorker() {
+    return isset($_SESSION['role']) && ($_SESSION['role'] === 'HealthWorker' || $_SESSION['role'] === 'Doctor' || $_SESSION['role'] === 'Admin');
+}
+
+function isPatient() {
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'Patient';
+}
 ?>
